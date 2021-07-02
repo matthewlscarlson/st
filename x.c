@@ -490,6 +490,9 @@ bpress(XEvent *e)
 
 		selstart(evcol(e), evrow(e), snap);
 	}
+	
+	if (e->xbutton.button == Button3)
+ 		selpaste(NULL);
 }
 
 void
