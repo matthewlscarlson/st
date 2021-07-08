@@ -6,8 +6,7 @@
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
 static char *font = "monospace:pixelsize=16:antialias=true:autohint=true";
-static char *font2[] = {
-};
+static char *font2[] = { "monospace:pixelsize=16:antialias=true:autohint=true" };
 
 static int borderpx = 2;
 
@@ -76,11 +75,11 @@ static unsigned int cursorthickness = 2;
  *    Bold affects lines thickness if boxdraw_bold is not 0. Italic is ignored.
  * 0: disable (render all U25XX glyphs normally from the font).
  */
-const int boxdraw = 1;
-const int boxdraw_bold = 1;
+int boxdraw = 1;
+int boxdraw_bold = 1;
 
 /* braille (U28XX):  1: render as adjacent "pixels",  0: use font */
-const int boxdraw_braille = 1;
+int boxdraw_braille = 1;
 
 /*
  * bell volume. It must be a value between -100 and 100. Use 0 for disabling
@@ -199,36 +198,60 @@ static uint forcemousemod = ShiftMask;
  * Xresources preferences to load at startup
  */
 ResourcePref resources[] = {
-		{ "font",         STRING,  &font },
-		{ "color0",       STRING,  &colorname[0] },
-		{ "color1",       STRING,  &colorname[1] },
-		{ "color2",       STRING,  &colorname[2] },
-		{ "color3",       STRING,  &colorname[3] },
-		{ "color4",       STRING,  &colorname[4] },
-		{ "color5",       STRING,  &colorname[5] },
-		{ "color6",       STRING,  &colorname[6] },
-		{ "color7",       STRING,  &colorname[7] },
-		{ "color8",       STRING,  &colorname[8] },
-		{ "color9",       STRING,  &colorname[9] },
-		{ "color10",      STRING,  &colorname[10] },
-		{ "color11",      STRING,  &colorname[11] },
-		{ "color12",      STRING,  &colorname[12] },
-		{ "color13",      STRING,  &colorname[13] },
-		{ "color14",      STRING,  &colorname[14] },
-		{ "color15",      STRING,  &colorname[15] },
-		{ "background",   STRING,  &colorname[258] },
-		{ "foreground",   STRING,  &colorname[257] },
-		{ "cursorColor",  STRING,  &colorname[256] },
-		{ "termname",     STRING,  &termname },
-		{ "shell",        STRING,  &shell },
-		{ "minlatency",   INTEGER, &minlatency },
-		{ "maxlatency",   INTEGER, &maxlatency },
-		{ "blinktimeout", INTEGER, &blinktimeout },
-		{ "bellvolume",   INTEGER, &bellvolume },
-		{ "tabspaces",    INTEGER, &tabspaces },
-		{ "borderpx",     INTEGER, &borderpx },
-		{ "cwscale",      FLOAT,   &cwscale },
-		{ "chscale",      FLOAT,   &chscale },
+		{ "font",               STRING,  &font },
+        { "font2",              STRING,  &font2[0] },
+		{ "color0",             STRING,  &colorname[0] },
+		{ "color1",             STRING,  &colorname[1] },
+		{ "color2",             STRING,  &colorname[2] },
+		{ "color3",             STRING,  &colorname[3] },
+		{ "color4",             STRING,  &colorname[4] },
+		{ "color5",             STRING,  &colorname[5] },
+		{ "color6",             STRING,  &colorname[6] },
+		{ "color7",             STRING,  &colorname[7] },
+		{ "color8",             STRING,  &colorname[8] },
+		{ "color9",             STRING,  &colorname[9] },
+		{ "color10",            STRING,  &colorname[10] },
+		{ "color11",            STRING,  &colorname[11] },
+		{ "color12",            STRING,  &colorname[12] },
+		{ "color13",            STRING,  &colorname[13] },
+		{ "color14",            STRING,  &colorname[14] },
+		{ "color15",            STRING,  &colorname[15] },
+		{ "background",         STRING,  &colorname[258] },
+		{ "foreground",         STRING,  &colorname[257] },
+		{ "cursorColor",        STRING,  &colorname[256] },
+		{ "termname",           STRING,  &termname },
+		{ "shell",              STRING,  &shell },
+		{ "minlatency",         INTEGER, &minlatency },
+		{ "maxlatency",         INTEGER, &maxlatency },
+		{ "blinktimeout",       INTEGER, &blinktimeout },
+		{ "bellvolume",         INTEGER, &bellvolume },
+		{ "tabspaces",          INTEGER, &tabspaces },
+		{ "borderpx",           INTEGER, &borderpx },
+		{ "cwscale",            FLOAT,   &cwscale },
+		{ "chscale",            FLOAT,   &chscale },
+        { "doubleclicktimeout", INTEGER, &doubleclicktimeout },
+        { "tripleclicktimeout", INTEGER, &tripleclicktimeout },
+        { "allowaltscreen",     INTEGER, &allowaltscreen },
+        { "allowwindowops",     INTEGER, &allowwindowops },
+        { "cursorthickness",    INTEGER, &cursorthickness },
+        { "boxdraw",            INTEGER, &boxdraw },
+        { "boxdraw_bold",       INTEGER, &boxdraw_bold },
+        { "boxdraw_braille",    INTEGER, &boxdraw_braille },
+        { "bellvolume",         INTEGER, &bellvolume },
+        { "alpha",              FLOAT,   &alpha },
+        { "alphaUnfocused",     FLOAT,   &alphaUnfocused },
+        { "defaultfg",          INTEGER, &defaultfg },
+        { "defaultbg",          INTEGER, &defaultbg },
+        { "defaultcs",          INTEGER, &defaultcs },
+        { "defaultrcs",         INTEGER, &defaultrcs },
+        { "bg",                 INTEGER, &bg },
+        { "bgUnfocused",        INTEGER, &bgUnfocused },
+        { "cursorstyle",        INTEGER, &cursorstyle },
+        { "cols",               INTEGER, &cols },
+        { "rows",               INTEGER, &rows },
+        { "mousefg",            INTEGER, &mousefg },
+        { "mousebg",            INTEGER, &mousebg },
+        { "defaultattr",        INTEGER, &defaultattr },
 };
 
 /*
