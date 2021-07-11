@@ -120,6 +120,11 @@ typedef struct {
 	Draw draw;
 	Visual *vis;
 	XSetWindowAttributes attrs;
+    /* Here, we use the term *pointer* to differentiate the cursor
+     * one sees when hovering the mouse over the terminal from, e.g.,
+     * a green rectangle where text would be entered. */
+    Cursor vpointer, bpointer; /* visible and hidden pointers */
+    int pointerisvisible;
 	int scr;
 	int isfixed; /* is fixed geometry? */
 	int depth; /* bit depth */
@@ -516,7 +521,7 @@ bpress(XEvent *e)
 
 		selstart(evcol(e), evrow(e), snap);
 	}
-	
+
 	if (e->xbutton.button == Button3)
  		selpaste(NULL);
 }
@@ -730,6 +735,13 @@ brelease(XEvent *e)
 void
 bmotion(XEvent *e)
 {
+    if (!xw.pointerisvisible) {
+        XDefineCursor(xw.dpy, xw.win, xw.vpointer);
+        xw.pointerisvisible = 1;
+        if (!IS_SET(MODE_MOUSEMANY))
+            xsetpointermotion(0);
+        }
+
 	if (IS_SET(MODE_MOUSE) && !(e->xbutton.state & forcemousemod)) {
 		mousereport(e);
 		return;
@@ -819,7 +831,7 @@ xloadcols(void)
 {
 	static int loaded;
 	Color *cp;
-	
+
 	if (!loaded) {
 		dc.collen = 1 + (defaultbg = MAX(LEN(colorname), 256));
 		dc.col = xmalloc((dc.collen) * sizeof(Color));
@@ -1066,7 +1078,7 @@ xloadsparefont(FcPattern *pattern, int flags)
 {
 	FcPattern *match;
 	FcResult result;
-	
+
 	match = FcFontMatch(NULL, pattern, &result);
 	if (!match) {
 		return 1;
@@ -1108,50 +1120,50 @@ xloadsparefonts(void)
 	}
 
 	for (fp = font2; fp - font2 < fc; ++fp) {
-	
+
 		if (**fp == '-')
 			pattern = XftXlfdParse(*fp, False, False);
 		else
 			pattern = FcNameParse((FcChar8 *)*fp);
-	
+
 		if (!pattern)
 			die("can't open spare font %s\n", *fp);
-	   		
+
 		if (defaultfontsize > 0) {
 			sizeshift = usedfontsize - defaultfontsize;
 			if (sizeshift != 0 &&
 					FcPatternGetDouble(pattern, FC_PIXEL_SIZE, 0, &fontval) ==
-					FcResultMatch) {	
+					FcResultMatch) {
 				fontval += sizeshift;
 				FcPatternDel(pattern, FC_PIXEL_SIZE);
 				FcPatternDel(pattern, FC_SIZE);
 				FcPatternAddDouble(pattern, FC_PIXEL_SIZE, fontval);
 			}
 		}
-	
+
 		FcPatternAddBool(pattern, FC_SCALABLE, 1);
-	
+
 		FcConfigSubstitute(NULL, pattern, FcMatchPattern);
 		XftDefaultSubstitute(xw.dpy, xw.scr, pattern);
-	
+
 		if (xloadsparefont(pattern, FRC_NORMAL))
 			die("can't open spare font %s\n", *fp);
-	
+
 		FcPatternDel(pattern, FC_SLANT);
 		FcPatternAddInteger(pattern, FC_SLANT, FC_SLANT_ITALIC);
 		if (xloadsparefont(pattern, FRC_ITALIC))
 			die("can't open spare font %s\n", *fp);
-			
+
 		FcPatternDel(pattern, FC_WEIGHT);
 		FcPatternAddInteger(pattern, FC_WEIGHT, FC_WEIGHT_BOLD);
 		if (xloadsparefont(pattern, FRC_ITALICBOLD))
 			die("can't open spare font %s\n", *fp);
-	
+
 		FcPatternDel(pattern, FC_SLANT);
 		FcPatternAddInteger(pattern, FC_SLANT, FC_SLANT_ROMAN);
 		if (xloadsparefont(pattern, FRC_BOLD))
 			die("can't open spare font %s\n", *fp);
-	
+
 		FcPatternDestroy(pattern);
 	}
 }
@@ -1236,15 +1248,15 @@ void
 xinit(int cols, int rows)
 {
 	XGCValues gcvalues;
-	Cursor cursor;
 	Window parent;
 	pid_t thispid = getpid();
 	XColor xmousefg, xmousebg;
 	XWindowAttributes attr;
 	XVisualInfo vis;
+    Pixmap blankpm;
 
 	xw.scr = XDefaultScreen(xw.dpy);
-	
+
 	if (!(opt_embed && (parent = strtol(opt_embed, NULL, 0)))) {
 		parent = XRootWindow(xw.dpy, xw.scr);
 		xw.depth = 32;
@@ -1254,7 +1266,7 @@ xinit(int cols, int rows)
 	}
 
 	XMatchVisualInfo(xw.dpy, xw.scr, xw.depth, TrueColor, &vis);
-	xw.vis = vis.visual;	
+	xw.vis = vis.visual;
 
 	/* font */
 	if (!FcInit())
@@ -1262,7 +1274,7 @@ xinit(int cols, int rows)
 
 	usedfont = (opt_font == NULL)? font : opt_font;
 	xloadfonts(usedfont, defaultfontsize);
-	
+
 	/* spare fonts */
 	xloadsparefonts();
 
@@ -1287,7 +1299,7 @@ xinit(int cols, int rows)
 		| ButtonMotionMask | ButtonPressMask | ButtonReleaseMask;
 	xw.attrs.colormap = xw.cmap;
 
-	
+
 	xw.win = XCreateWindow(xw.dpy, parent, xw.l, xw.t,
 			win.w, win.h, 0, xw.depth, InputOutput,
 			xw.vis, CWBackPixel | CWBorderPixel | CWBitGravity
@@ -1313,8 +1325,9 @@ xinit(int cols, int rows)
 	}
 
 	/* white cursor, black outline */
-	cursor = XCreateFontCursor(xw.dpy, mouseshape);
-	XDefineCursor(xw.dpy, xw.win, cursor);
+    xw.pointerisvisible = 1;
+    xw.vpointer = XCreateFontCursor(xw.dpy, mouseshape);
+    XDefineCursor(xw.dpy, xw.win, xw.vpointer);
 
 	if (XParseColor(xw.dpy, xw.cmap, colorname[mousefg], &xmousefg) == 0) {
 		xmousefg.red   = 0xffff;
@@ -1328,7 +1341,10 @@ xinit(int cols, int rows)
 		xmousebg.blue  = 0x0000;
 	}
 
-	XRecolorCursor(xw.dpy, cursor, &xmousefg, &xmousebg);
+    XRecolorCursor(xw.dpy, xw.vpointer, &xmousefg, &xmousebg);
+    blankpm = XCreateBitmapFromData(xw.dpy, xw.win, &(char){0}, 1, 1);
+    xw.bpointer = XCreatePixmapCursor(xw.dpy, blankpm, blankpm,
+                                      &xmousefg, &xmousebg, 0, 0);
 
 	xw.xembed = XInternAtom(xw.dpy, "_XEMBED", False);
 	xw.wmdeletewin = XInternAtom(xw.dpy, "WM_DELETE_WINDOW", False);
@@ -1612,7 +1628,7 @@ xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len, int x, i
 	} else {
 		/* Render the glyphs. */
 		XftDrawGlyphFontSpec(xw.draw, fg, specs, len);
-	}	
+	}
 
 	/* Render underline and strikethrough. */
 	if (base.mode & ATTR_UNDERLINE) {
@@ -1943,6 +1959,8 @@ unmap(XEvent *ev)
 void
 xsetpointermotion(int set)
 {
+    if (!set && !xw.pointerisvisible)
+        return;
 	MODBIT(xw.attrs.event_mask, set, PointerMotionMask);
 	XChangeWindowAttributes(xw.dpy, xw.win, CWEventMask, &xw.attrs);
 }
@@ -2074,6 +2092,12 @@ kpress(XEvent *ev)
 	Rune c;
 	Status status;
 	Shortcut *bp;
+
+    if (xw.pointerisvisible) {
+        XDefineCursor(xw.dpy, xw.win, xw.bpointer);
+        xsetpointermotion(1);
+        xw.pointerisvisible = 0;
+    }
 
 	if (IS_SET(MODE_KBDLOCK))
 		return;
