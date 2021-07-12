@@ -1117,7 +1117,7 @@ tscrolldown(int orig, int n, int copyhist)
 	Line temp;
 
 	LIMIT(n, 0, term.bot-orig+1);
-	
+
 	if (copyhist) {
 		term.histi = (term.histi - 1 + HISTSIZE) % HISTSIZE;
 		temp = term.hist[term.histi];
@@ -1133,7 +1133,7 @@ tscrolldown(int orig, int n, int copyhist)
 		term.line[i] = term.line[i-n];
 		term.line[i-n] = temp;
 	}
-	
+
 	if (term.scr == 0)
 		selscroll(orig, n);
 }
@@ -1164,7 +1164,7 @@ tscrollup(int orig, int n, int copyhist)
 		term.line[i] = term.line[i+n];
 		term.line[i+n] = temp;
 	}
-	
+
 	if (term.scr == 0)
 		selscroll(orig, -n);
 }
@@ -2628,7 +2628,7 @@ tresize(int col, int row)
 	term.alt  = xrealloc(term.alt,  row * sizeof(Line));
 	term.dirty = xrealloc(term.dirty, row * sizeof(*term.dirty));
 	term.tabs = xrealloc(term.tabs, col * sizeof(*term.tabs));
-	
+
 	for (i = 0; i < HISTSIZE; i++) {
 		term.hist[i] = xrealloc(term.hist[i], col * sizeof(Glyph));
 		for (j = mincol; j < col; j++) {
@@ -2717,8 +2717,9 @@ draw(void)
 
 	drawregion(0, 0, term.col, term.row);
 	if (term.scr == 0)
-		xdrawcursor(cx, term.c.y, term.line[term.c.y][cx],
-				term.ocx, term.ocy, term.line[term.ocy][term.ocx]);
+	    xdrawcursor(cx, term.c.y, term.line[term.c.y][cx],
+                    term.ocx, term.ocy, term.line[term.ocy][term.ocx],
+                    term.line[term.ocy], term.col);
 	term.ocx = cx;
 	term.ocy = term.c.y;
 	xfinishdraw();
