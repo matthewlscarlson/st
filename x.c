@@ -517,7 +517,7 @@ bpress(XEvent *e)
 
 		selstart(evcol(e), evrow(e), snap);
 	}
-	
+
 	if (e->xbutton.button == Button3)
  		selpaste(NULL);
 }
@@ -820,7 +820,7 @@ xloadcols(void)
 {
 	static int loaded;
 	Color *cp;
-	
+
 	if (!loaded) {
 		dc.collen = 1 + (defaultbg = MAX(LEN(colorname), 256));
 		dc.col = xmalloc((dc.collen) * sizeof(Color));
@@ -853,6 +853,14 @@ xsetcolorname(int x, const char *name)
 
 	XftColorFree(xw.dpy, xw.vis, xw.cmap, &dc.col[x]);
 	dc.col[x] = ncolor;
+
+    if (x == defaultbg) {
+        if (opt_alpha)
+            alpha = strtof(opt_alpha, NULL);
+        dc.col[defaultbg].color.alpha = (unsigned short)(0xffff * alpha);
+        dc.col[defaultbg].pixel &= 0x00FFFFFF;
+        dc.col[defaultbg].pixel |= (unsigned char)(0xff * alpha) << 24;
+    }
 
 	return 0;
 }
@@ -1067,7 +1075,7 @@ xloadsparefont(FcPattern *pattern, int flags)
 {
 	FcPattern *match;
 	FcResult result;
-	
+
 	match = FcFontMatch(NULL, pattern, &result);
 	if (!match) {
 		return 1;
@@ -1109,50 +1117,50 @@ xloadsparefonts(void)
 	}
 
 	for (fp = font2; fp - font2 < fc; ++fp) {
-	
+
 		if (**fp == '-')
 			pattern = XftXlfdParse(*fp, False, False);
 		else
 			pattern = FcNameParse((FcChar8 *)*fp);
-	
+
 		if (!pattern)
 			die("can't open spare font %s\n", *fp);
-	   		
+
 		if (defaultfontsize > 0) {
 			sizeshift = usedfontsize - defaultfontsize;
 			if (sizeshift != 0 &&
 					FcPatternGetDouble(pattern, FC_PIXEL_SIZE, 0, &fontval) ==
-					FcResultMatch) {	
+					FcResultMatch) {
 				fontval += sizeshift;
 				FcPatternDel(pattern, FC_PIXEL_SIZE);
 				FcPatternDel(pattern, FC_SIZE);
 				FcPatternAddDouble(pattern, FC_PIXEL_SIZE, fontval);
 			}
 		}
-	
+
 		FcPatternAddBool(pattern, FC_SCALABLE, 1);
-	
+
 		FcConfigSubstitute(NULL, pattern, FcMatchPattern);
 		XftDefaultSubstitute(xw.dpy, xw.scr, pattern);
-	
+
 		if (xloadsparefont(pattern, FRC_NORMAL))
 			die("can't open spare font %s\n", *fp);
-	
+
 		FcPatternDel(pattern, FC_SLANT);
 		FcPatternAddInteger(pattern, FC_SLANT, FC_SLANT_ITALIC);
 		if (xloadsparefont(pattern, FRC_ITALIC))
 			die("can't open spare font %s\n", *fp);
-			
+
 		FcPatternDel(pattern, FC_WEIGHT);
 		FcPatternAddInteger(pattern, FC_WEIGHT, FC_WEIGHT_BOLD);
 		if (xloadsparefont(pattern, FRC_ITALICBOLD))
 			die("can't open spare font %s\n", *fp);
-	
+
 		FcPatternDel(pattern, FC_SLANT);
 		FcPatternAddInteger(pattern, FC_SLANT, FC_SLANT_ROMAN);
 		if (xloadsparefont(pattern, FRC_BOLD))
 			die("can't open spare font %s\n", *fp);
-	
+
 		FcPatternDestroy(pattern);
 	}
 }
@@ -1248,7 +1256,7 @@ xinit(int cols, int rows)
 	XVisualInfo vis;
 
 	xw.scr = XDefaultScreen(xw.dpy);
-	
+
 	if (!(opt_embed && (parent = strtol(opt_embed, NULL, 0)))) {
 		parent = XRootWindow(xw.dpy, xw.scr);
 		xw.depth = 32;
@@ -1258,7 +1266,7 @@ xinit(int cols, int rows)
 	}
 
 	XMatchVisualInfo(xw.dpy, xw.scr, xw.depth, TrueColor, &vis);
-	xw.vis = vis.visual;	
+	xw.vis = vis.visual;
 
 	/* font */
 	if (!FcInit())
@@ -1266,7 +1274,7 @@ xinit(int cols, int rows)
 
 	usedfont = (opt_font == NULL)? font : opt_font;
 	xloadfonts(usedfont, defaultfontsize);
-	
+
 	/* spare fonts */
 	xloadsparefonts();
 
@@ -1291,7 +1299,7 @@ xinit(int cols, int rows)
 		| ButtonMotionMask | ButtonPressMask | ButtonReleaseMask;
 	xw.attrs.colormap = xw.cmap;
 
-	
+
 	xw.win = XCreateWindow(xw.dpy, parent, xw.l, xw.t,
 			win.w, win.h, 0, xw.depth, InputOutput,
 			xw.vis, CWBackPixel | CWBorderPixel | CWBitGravity
@@ -1619,7 +1627,7 @@ xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len, int x, i
 	} else {
 		/* Render the glyphs. */
 		XftDrawGlyphFontSpec(xw.draw, fg, specs, len);
-	}	
+	}
 
 	/* Render underline and strikethrough. */
 	if (base.mode & ATTR_UNDERLINE) {
