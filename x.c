@@ -2382,43 +2382,43 @@ xrdb_load(void)
                 colorname[i] = ret.addr;
         }
 
-        XRESOURCE_LOAD_STRING("foreground", colorname[defaultfg]);
-        XRESOURCE_LOAD_STRING("background", colorname[defaultbg]);
-        XRESOURCE_LOAD_STRING("cursorfg", colorname[defaultcs])
-        else {
-            // this looks confusing because we are chaining off of the if
-            // in the macro. probably we should be wrapping everything blocks
-            // so this isn't possible...
-            defaultcs = defaultfg;
-        }
-        XRESOURCE_LOAD_STRING("reverse-cursor", colorname[defaultrcs])
-        else {
-            // see above.
-            defaultrcs = defaultbg;
-        }
-
         XRESOURCE_LOAD_STRING("font", font);
+        XRESOURCE_LOAD_STRING("background", colorname[258]);
+        XRESOURCE_LOAD_STRING("foreground", colorname[257]);
+        XRESOURCE_LOAD_STRING("cursorColor", colorname[256]);
         XRESOURCE_LOAD_STRING("termname", termname);
-
-        /* XRESOURCE_LOAD_INTEGER("xfps", xfps); */
-        /* XRESOURCE_LOAD_INTEGER("actionfps", actionfps); */
+        XRESOURCE_LOAD_STRING("shell", shell);
+        XRESOURCE_LOAD_INTEGER("minlatency", minlatency);
+        XRESOURCE_LOAD_INTEGER("maxlatency", maxlatency);
         XRESOURCE_LOAD_INTEGER("blinktimeout", blinktimeout);
         XRESOURCE_LOAD_INTEGER("bellvolume", bellvolume);
+        XRESOURCE_LOAD_INTEGER("tabspaces", tabspaces);
         XRESOURCE_LOAD_INTEGER("borderpx", borderpx);
-        /* XRESOURCE_LOAD_INTEGER("borderless", borderless); */
-
-        /* cursorblinkstate = 1; // in case if cursor shape was changed from a blinking one to a non-blinking */
-        /* XRESOURCE_LOAD_INTEGER("cursorthickness", cursorthickness); */
-        /* XRESOURCE_LOAD_INTEGER("cursorblinkstyle", cursorblinkstyle); */
-        /* XRESOURCE_LOAD_INTEGER("cursorblinkontype", cursorblinkontype); */
-
-        /* todo: https://github.com/gnotclub/xst/commit/1e82647b0e04077e975679a4b4cf1eb02b04e6bc */
-        /* XRESOURCE_LOAD_INTEGER("mouseScrollLines", mousescrolllines); */
-
         XRESOURCE_LOAD_FLOAT("cwscale", cwscale);
         XRESOURCE_LOAD_FLOAT("chscale", chscale);
-
-        /* XRESOURCE_LOAD_CHAR("prompt_char", prompt_char); */
+        XRESOURCE_LOAD_INTEGER("doubleclicktimeout", doubleclicktimeout);
+        XRESOURCE_LOAD_INTEGER("tripleclicktimeout", tripleclicktimeout);
+        XRESOURCE_LOAD_INTEGER("allowaltscreen", allowaltscreen);
+        XRESOURCE_LOAD_INTEGER("allowwindowops", allowwindowops);
+        XRESOURCE_LOAD_INTEGER("cursorthickness", cursorthickness);
+        XRESOURCE_LOAD_INTEGER("boxdraw", boxdraw);
+        XRESOURCE_LOAD_INTEGER("boxdraw_bold", boxdraw_bold);
+        XRESOURCE_LOAD_INTEGER("boxdraw_braille", boxdraw_braille);
+        XRESOURCE_LOAD_INTEGER("bellvolume", bellvolume);
+        XRESOURCE_LOAD_FLOAT("alpha", alpha);
+        XRESOURCE_LOAD_FLOAT("alphaUnfocused", alphaUnfocused);
+        XRESOURCE_LOAD_INTEGER("defaultfg", defaultfg);
+        XRESOURCE_LOAD_INTEGER("defaultbg", defaultbg);
+        XRESOURCE_LOAD_INTEGER("defaultcs", defaultcs);
+        XRESOURCE_LOAD_INTEGER("defaultrcs", defaultrcs);
+        XRESOURCE_LOAD_INTEGER("bg", bg);
+        XRESOURCE_LOAD_INTEGER("bgUnfocused", bgUnfocused);
+        XRESOURCE_LOAD_INTEGER("cursorstyle", cursorstyle);
+        XRESOURCE_LOAD_INTEGER("cols", cols);
+        XRESOURCE_LOAD_INTEGER("rows", rows);
+        XRESOURCE_LOAD_INTEGER("mousefg", mousefg);
+        XRESOURCE_LOAD_INTEGER("mousebg", mousebg);
+        XRESOURCE_LOAD_INTEGER("defaultattr", defaultattr);
     }
     XFlush(dpy);
 }
