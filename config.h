@@ -2,7 +2,7 @@
 
 // fonts
 static char *font    = "monospace:pixelsize=16:antialias=true:autohint=true";
-static char *font2[] = { "monospace:pixelsize=16:antialias=true:autohint=true" };
+static char *font2[] = { "Noto Color Emoji:style=Regular:size=16" };
 
 // padding basically
 static int borderpx = 2;
